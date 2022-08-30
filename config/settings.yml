@@ -1,4 +1,4 @@
 plugins:
-  plugin_name_enabled:
+  google_one_tap_enabled:
     default: true
     client: true

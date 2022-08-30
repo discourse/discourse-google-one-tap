@@ -1,1 +1,3 @@
 en:
+  site_settings:
+    google_one_tap_enabled: Enable Google One Tap. It also requires to have Google client id in site settings.
