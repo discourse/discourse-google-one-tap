@@ -69,7 +69,7 @@ module OmniAuth
           # Here we just transform the payload to what OmniAuth expects.
           transformTokenToOmniauth(payload, request.params["credential"])
         rescue GoogleIDToken::ValidationError => e
-          return fail!(:google_one_tap_validation_error, e)
+          fail!(:google_one_tap_validation_error, e)
         end
       end
 
