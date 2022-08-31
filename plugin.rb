@@ -36,6 +36,7 @@ after_initialize do
         result += "data-prompt_parent_id='g_id_onload'"
         result += "data-client_id=" + SiteSetting.google_oauth2_client_id + " "
         result += "data-login_uri='/auth/google_one_tap/callback' "
+        result += "data-itp_support='true' "
         result += "style='position: absolute; top: 100px; right: 30px; width: 400px; height: 200px; z-index: 1001;'> " # Todo load style values from plugin settings*.
         result += "</div>"
     end
