@@ -86,7 +86,6 @@ module OmniAuth
           raise CSRFTokenVerifier::InvalidCSRFToken
         end
         if g_csrf_cookie != g_csrf_token
-          $stderr.puts "I was here"
           raise CSRFTokenVerifier::InvalidCSRFToken
         end
         true
