@@ -63,7 +63,7 @@ User can revoke directly from their google account: https://myaccount.google.com
 - ~~Decide on how to show the sign in/sign up iframe/popup. See [this](assets/javascripts/discourse/templates/components/login-buttons.hbs) for more details.~~
   - ~~Cureently it shows on all pages.~~ 
   - ~~How to probely show it on login modal.~~
-- Test/ensure user avatar is pulled from Google.
+- ~~Test/ensure user avatar is pulled from Google.~~
 - ~~Test/ensure user can revoke connection.~~
 
 
