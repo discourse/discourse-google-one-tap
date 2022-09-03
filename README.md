@@ -43,16 +43,29 @@ Parsed:
 
 Again the caveate is that when using plugin client_id would be exposed to public (I don't think there is a way to hide it). However discourse no longer would need to know your client secret.
 
+## Account revoke
+
+Revoking is not possile from account prefernce. 
+User can revoke directly from their google account: https://myaccount.google.com/permissions.
+
+## How to use: 
+
+- Install like installing any other plugin: https://meta.discourse.org/t/install-plugins-in-discourse/19157 
+- Make sure you have clinet_id for google oauth is set in site settings. (_if you are using Google Oauth this should be already defined). To know how to set it Refer to https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid
+- Enable `google_one_tap` plguin in site settings
+
+
 ## Next Steps: 
 
 - Getting inital review of the implementation so far.
 - Strat writing the tests.
 - Decide on what settings are needed. See [this](plugin.rb#24) for more details.
-- Decide on how to show the sign in/sign up iframe/popup. See [this](assets/javascripts/discourse/templates/components/login-buttons.hbs) for more details.
-  - Cureently it shows on all pages. 
-  - How to probely show it on login modal. 
+- ~~Decide on how to show the sign in/sign up iframe/popup. See [this](assets/javascripts/discourse/templates/components/login-buttons.hbs) for more details.~~
+  - ~~Cureently it shows on all pages.~~ 
+  - ~~How to probely show it on login modal.~~
 - Test/ensure user avatar is pulled from Google.
-- Test/ensure user can revoke connection. 
+- ~~Test/ensure user can revoke connection.~~
+
 
 ## Refrences: 
 - [Google One Tab Official](https://developers.google.com/identity/gsi/web/)
