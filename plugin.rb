@@ -15,6 +15,10 @@ require_relative "lib/google_one_tap"
 require_relative "lib/google_one_tap_authenticator"
 register_asset "stylesheets/google_one_tap.scss"
 
+extend_content_security_policy(
+script_src: ['https://accounts.google.com'],
+)
+
 after_initialize do
 
   register_html_builder('server:before-head-close') do
