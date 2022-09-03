@@ -12,6 +12,14 @@ class GoogleOneTapAuthenticator < Auth::ManagedAuthenticator
     SiteSetting.google_one_tap_enabled
   end
 
+  def can_revoke?
+    false
+  end
+
+  def can_connect_existing_user?
+    false
+  end
+
   def register_middleware(omniauth)
     omniauth.provider OmniAuth::Strategies::GoogleOneTap, setup: lambda { |env|
                                                                    strategy = env["omniauth.strategy"]}
