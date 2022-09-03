@@ -3,6 +3,8 @@
 module OmniAuth
   module Strategies
     class GoogleOneTap
+      class GoogleOneTapValidationError < StandardError; end
+      class GoogleOneTapCSFRError < StandardError; end
       include OmniAuth::Strategy
 
       option :name , "google_one_tap"
@@ -25,8 +27,8 @@ module OmniAuth
         # Ref: https://developers.google.com/identity/gsi/web/guides/verify-google-id-token
         if check_csrf
           self.access_token = build_access_token # It builds and validate it!.
-          super
         end
+        super
       end
       def transformTokenToOmniauth(payload, credential)
         auth_token = {
@@ -69,7 +71,7 @@ module OmniAuth
           # Here we just transform the payload to what OmniAuth expects.
           transformTokenToOmniauth(payload, request.params["credential"])
         rescue GoogleIDToken::ValidationError => e
-          fail!(:google_one_tap_validation_error, e)
+          raise GoogleOneTapValidationError.new "Validation Error: #{e.message}"
         end
       end
 
@@ -84,11 +86,12 @@ module OmniAuth
           raise CSRFTokenVerifier::InvalidCSRFToken
         end
         if g_csrf_cookie != g_csrf_token
+          $stderr.puts "I was here"
           raise CSRFTokenVerifier::InvalidCSRFToken
         end
         true
         rescue CSRFTokenVerifier::InvalidCSRFToken => e
-          fail!(:google_one_tap_csrf_error, e)
+          raise GoogleOneTapCSFRError.new "CSRF Error"
       end
       end
 
@@ -106,6 +109,9 @@ module OmniAuth
 
       def uid
         @access_token[:uid]
+      end
+      def provider
+        @access_token[:provider]
       end
     end
   end
