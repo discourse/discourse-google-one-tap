@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-# name: google-one-tap
+# name: discourse-google-one-tap
 # about: Something
 # version: 0.0.1
-# authors: Discourse
+# authors: Ghassan Maslamani
 # url: https://github.com/ghassanmas/discourse-google-one-tap
 # required_version: 2.7.0
 
