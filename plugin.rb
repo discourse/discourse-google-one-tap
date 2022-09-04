@@ -37,7 +37,7 @@ after_initialize do
     result = ""
     unless (ctx.current_user || !(ctx.request.cookies["authentication_data"].blank?)) #If user is authenticated or (about to create account). don't show the Popup
       result += "<div id='g_id_onload' "
-        result += "data-prompt_parent_id='g_id_onload'"
+        result += "data-prompt_parent_id='g_id_onload' "
         result += "data-client_id=" + SiteSetting.google_oauth2_client_id + " "
         result += "data-login_uri='/auth/google_one_tap/callback' "
         result += "data-itp_support='true' "
