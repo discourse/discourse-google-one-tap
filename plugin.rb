@@ -34,12 +34,14 @@ after_initialize do
     #> Do not obscure the perception that the One Tap prompt content is from a Google iframe.
     #> Failure to do so may result in project suspension, account suspension, or both.
     # Ref https://developers.google.com/identity/gsi/web/guides/change-position
+    current_hostname = Discourse.current_hostname
+    login_uri = if current_hostname == "localhost" then "http://localhost:3000" else "https://#{current_hostname}" end + "/auth/google_one_tap/callback"
     result = ""
     unless (ctx.current_user || !(ctx.request.cookies["authentication_data"].blank?)) #If user is authenticated or (about to create account). don't show the Popup
       result += "<div id='g_id_onload' "
         result += "data-prompt_parent_id='g_id_onload' "
         result += "data-client_id=" + SiteSetting.google_oauth2_client_id + " "
-        result += "data-login_uri='/auth/google_one_tap/callback' "
+        result += "data-login_uri=" + login_uri + " "
         result += "data-itp_support='true' "
         result += "style='position: absolute; top: 100px; right: 30px; width: 400px; height: 200px; z-index: 1001;'> " # Todo load style values from plugin settings*.
         result += "</div>"
