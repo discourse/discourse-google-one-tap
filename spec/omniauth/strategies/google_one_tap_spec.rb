@@ -24,7 +24,7 @@ describe OmniAuth::Strategies::GoogleOneTap do
         subject.request.stubs(:cookies).returns("g_csrf_token" => "somehtingelse")
       end
       it 'should fail because of csrf' do
-        expect { subject.callback_phase }.to raise_error(OmniAuth::Strategies::GoogleOneTap::GoogleOneTapCSFRError, /CSRF Error/)
+        expect { subject.check_csrf }.to raise_error(OmniAuth::Strategies::GoogleOneTap::GoogleOneTapCSFRError, /Invlaid CSRF/)
         expect(@app_called).to eq(false)
       end
     end
@@ -36,10 +36,11 @@ describe OmniAuth::Strategies::GoogleOneTap do
       subject.request.stubs(:cookies).returns("g_csrf_token" => "correct_csrf")
      end
       it 'should fail because of wrong credential' do
-        expect { subject.callback_phase }.to raise_error(OmniAuth::Strategies::GoogleOneTap::GoogleOneTapValidationError, /Validation Error: Token not verified as issued by Google/)
+        expect { subject.build_access_token }.to raise_error(OmniAuth::Strategies::GoogleOneTap::GoogleOneTapValidationError, /Validation Error/)
         expect(@app_called).to eq(false)
       end
    end
+
    describe 'callback phase when it cannot reach Google server to fetch certs' do
      before do
        stub_request(:get, "https://www.googleapis.com/oauth2/v1/certs").to_return(status: 404)
@@ -48,7 +49,7 @@ describe OmniAuth::Strategies::GoogleOneTap do
       subject.request.stubs(:cookies).returns("g_csrf_token" => "correct_csrf")
      end
       it 'should fail because it cannot reach Google server' do
-        expect { subject.callback_phase }.to raise_error(GoogleIDToken::CertificateError, /Unable to retrieve Google public keys/)
+        expect { subject.build_access_token }.to raise_error(GoogleIDToken::CertificateError, /Unable to retrieve Google public keys/)
         expect(@app_called).to eq(false)
       end
    end
@@ -71,7 +72,7 @@ describe OmniAuth::Strategies::GoogleOneTap do
       expect(@app_called).to eq(true)
       end
     end
-    describe 'callback phase when credential aud does not match client_it' do
+    describe 'callback phase when credential aud does not match client_id' do
       before do
         SiteSetting.google_oauth2_client_id = "diffrernt_client_id"
         cert_result = generate_certificate
@@ -84,7 +85,7 @@ describe OmniAuth::Strategies::GoogleOneTap do
         subject.stubs(:env).returns({})
       end
       it 'should fail because of wrong client id' do
-        expect { subject.callback_phase }.to raise_error(OmniAuth::Strategies::GoogleOneTap::GoogleOneTapValidationError, /Validation Error: Token audience mismatch/)
+        expect { subject.build_access_token }.to raise_error(OmniAuth::Strategies::GoogleOneTap::GoogleOneTapValidationError, /Validation Error/)
         expect(@app_called).to eq(false)
       end
     end
@@ -104,6 +105,8 @@ describe OmniAuth::Strategies::GoogleOneTap do
        "sub" => "3434342459",
      }, key, 'RS256')
    end
+   # The following function is replicated from google-id-token gem
+   # Ref: https://github.com/google/google-id-token/blob/46ac65ff03bd125d93b5acadd1c1adbdb86d919c/spec/google-id-token_spec.rb#L183-L200
    def generate_certificate
      key = OpenSSL::PKey::RSA.new(2048)
     public_key = key.public_key
@@ -122,5 +125,4 @@ describe OmniAuth::Strategies::GoogleOneTap do
 
     { key: key, cert: cert }
   end
-
 end
