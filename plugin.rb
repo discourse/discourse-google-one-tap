@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # name: discourse-google-one-tap
-# about: Something
+# about: Discourse Google One Tap/Sing in Plugin
 # version: 0.0.1
 # authors: Ghassan Maslamani
 # url: https://github.com/ghassanmas/discourse-google-one-tap
@@ -25,6 +25,11 @@ after_initialize do
     "<script src='https://accounts.google.com/gsi/client' async defer></script>"
   end
 
+  Discourse::Application.routes.prepend do
+    get "/auth/google_one_tap" => "exceptions#not_found"
+    get "/auth/google_one_tap/callback" => "exceptions#not_found"
+  end
+
   register_html_builder('server:before-body-close') do |ctx|
     #This return the div Google JS (loaded above will use)
     #This could also be done in pure JS
@@ -34,8 +39,7 @@ after_initialize do
     #> Do not obscure the perception that the One Tap prompt content is from a Google iframe.
     #> Failure to do so may result in project suspension, account suspension, or both.
     # Ref https://developers.google.com/identity/gsi/web/guides/change-position
-    current_hostname = Discourse.current_hostname
-    login_uri = if current_hostname == "localhost" then "http://localhost:3000" else "https://#{current_hostname}" end + "/auth/google_one_tap/callback"
+    login_uri = Discourse.base_url + "/auth/google_one_tap/callback"
     result = ""
     unless (ctx.current_user || !(ctx.request.cookies["authentication_data"].blank?)) #If user is authenticated or (about to create account). don't show the Popup
       result += "<div id='g_id_onload' "

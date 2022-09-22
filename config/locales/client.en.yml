@@ -2,8 +2,6 @@ en:
   site_settings:
     google_one_tap: Google One Tap
   js:
-    google_one_tap:
-      placeholder: Google One Tap Sing in
     login:
       google_one_tap:
         name: Google One Tap

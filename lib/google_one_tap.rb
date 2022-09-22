@@ -8,39 +8,42 @@ module OmniAuth
       include OmniAuth::Strategy
 
       option :name , "google_one_tap"
-      ALLOWED_ISSUERS = ['accounts.google.com', 'https://accounts.google.com'].freeze
 
-      # This is wbhere you pass the options you would pass when
-      # initializing your consumer from the OAuth gem.
       attr_accessor :access_token
-      option :provider_ignores_state, true
 
-      # We don't need this phase, Google one tap/idenentity framework dones't require it
-      # This is why this plugin doesn't need client_secret. as well
+      # There is no request phase for this strategy because it's implemented by the client-side google JS
       def request_phase
-        raise NotImplementedError
+        raise Middleware::OmniauthBypassMiddleware::AuthenticatorDisabled.new("Not exists")
       end
 
       # These are called after authentication has succeeded (From Google side!).
       def callback_phase
         # We first check for CSRF and then validate the token.
         # Ref: https://developers.google.com/identity/gsi/web/guides/verify-google-id-token
-        if check_csrf
-          self.access_token = build_access_token # It builds and validate it!.
-        end
-        super
+        begin
+         if check_csrf
+           self.access_token = build_access_token # It builds and validate it!.
+         end
+         super
+       rescue GoogleOneTapCSFRError => e
+         fail!(:invalid_csrf_token, e)
+       rescue GoogleOneTapValidationError => e
+         fail!(:invalid_credentials, e)
+        rescue GoogleIDToken::CertificateError => e
+          fail!(:certificate_error, e)
+       end
       end
-      def transformTokenToOmniauth(payload, credential)
+
+      def transform_token_to_omniauth(payload, credential)
         auth_token = {
           provider: "google_one_tap",
           info: {
             name: payload["name"],
             email: payload["email"],
-            email_verified: payload["email_verified"], # This always true (Accordoing to Google)
+            email_verified: payload["email_verified"],
             first_name: payload["given_name"],
             last_name: payload["family_name"],
             image: payload["picture"],
-            id_token: payload["jti"],
             nickname: payload["name"].gsub(" ", "_")
         },
           uid: payload["sub"],
@@ -59,19 +62,10 @@ module OmniAuth
         validator = GoogleIDToken::Validator.new
         begin
           payload = validator.check(request.params["credential"], SiteSetting.google_oauth2_client_id)
-          if !(ALLOWED_ISSUERS.include?(payload["iss"])) # This is a redundant check. Library already check for it
-            raise GoogleIDToken::ValidationError, "Invalid issuer."
-          end
-          if payload["aud"] != SiteSetting.google_oauth2_client_id  # This is aalso redudant check, bceause the validator above already checks this.
-            raise GoogleIDToken::ValidationError, "Invalid audience."
-          end
-          if payload["exp"] < Time.now.utc.to_i # Again also probably a redudant  check. I think "jwt" (which the library uses) already checks this.
-            raise GoogleIDToken::ValidationError, "Token expired."
-          end
           # Here we just transform the payload to what OmniAuth expects.
-          transformTokenToOmniauth(payload, request.params["credential"])
+          transform_token_to_omniauth(payload, request.params["credential"])
         rescue GoogleIDToken::ValidationError => e
-          raise GoogleOneTapValidationError.new "Validation Error: #{e.message}"
+          raise GoogleOneTapValidationError.new "Validation Error"
         end
       end
 
@@ -79,18 +73,18 @@ module OmniAuth
         g_csrf_token = request.params["g_csrf_token"]
         begin
         if g_csrf_token.blank?
-          raise CSRFTokenVerifier::InvalidCSRFToken
+          raise GoogleOneTapCSFRError
         end
         g_csrf_cookie = request.cookies["g_csrf_token"]
         if g_csrf_cookie.blank?
-          raise CSRFTokenVerifier::InvalidCSRFToken
+          raise GoogleOneTapCSFRError
         end
         if g_csrf_cookie != g_csrf_token
-          raise CSRFTokenVerifier::InvalidCSRFToken
+          raise GoogleOneTapCSFRError
         end
         true
-        rescue CSRFTokenVerifier::InvalidCSRFToken => e
-          raise GoogleOneTapCSFRError.new "CSRF Error"
+        rescue GoogleOneTapCSFRError => e
+          raise GoogleOneTapCSFRError.new("Invlaid CSRF")
       end
       end
 
