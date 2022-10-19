@@ -20,23 +20,21 @@ module OmniAuth
       def callback_phase
         # We first check for CSRF and then validate the token.
         # Ref: https://developers.google.com/identity/gsi/web/guides/verify-google-id-token
-        begin
-         if check_csrf
-           self.access_token = build_access_token # It builds and validate it!.
-         end
-         super
-       rescue GoogleOneTapCSFRError => e
-         fail!(:invalid_csrf_token, e)
-       rescue GoogleOneTapValidationError => e
-         fail!(:invalid_credentials, e)
-        rescue GoogleIDToken::CertificateError => e
-          fail!(:certificate_error, e)
-       end
+        validate_csrf!
+        self.access_token = build_access_token # It builds and validate it!.
+        super
+      rescue GoogleOneTapCSFRError => e
+        fail!(:invalid_csrf_token, e)
+      rescue GoogleOneTapValidationError => e
+        fail!(:invalid_credentials, e)
+      rescue GoogleIDToken::CertificateError => e
+        fail!(:certificate_error, e)
       end
 
       def transform_token_to_omniauth(payload, credential)
-        auth_token = {
+        {
           provider: "google_one_tap",
+          uid: payload["sub"],
           info: {
             name: payload["name"],
             email: payload["email"],
@@ -45,14 +43,11 @@ module OmniAuth
             last_name: payload["family_name"],
             image: payload["picture"],
             nickname: payload["name"].gsub(" ", "_")
-        },
-          uid: payload["sub"],
+          },
           extra: {
-          raw_info: credential #This the Google id-token (don't confuse this credential with the optional hash value of OmniAuth)
+            raw_info: credential #This the Google id-token (don't confuse this credential with the optional hash value of OmniAuth)
+          }
         }
-
-      }
-      auth_token
       end
 
       def build_access_token
@@ -60,32 +55,19 @@ module OmniAuth
         #The library already does few checks
         #Ref: https://github.com/google/google-id-token/blob/v1.4.2/lib/google-id-token.rb
         validator = GoogleIDToken::Validator.new
-        begin
-          payload = validator.check(request.params["credential"], SiteSetting.google_oauth2_client_id)
-          # Here we just transform the payload to what OmniAuth expects.
-          transform_token_to_omniauth(payload, request.params["credential"])
-        rescue GoogleIDToken::ValidationError => e
-          raise GoogleOneTapValidationError.new "Validation Error"
-        end
+        payload = validator.check(request.params["credential"], SiteSetting.google_oauth2_client_id)
+        # Here we just transform the payload to what OmniAuth expects.
+        transform_token_to_omniauth(payload, request.params["credential"])
+      rescue GoogleIDToken::ValidationError
+        raise GoogleOneTapValidationError.new "Validation Error"
       end
 
-      def check_csrf
+      def validate_csrf!
         g_csrf_token = request.params["g_csrf_token"]
-        begin
-        if g_csrf_token.blank?
-          raise GoogleOneTapCSFRError
-        end
         g_csrf_cookie = request.cookies["g_csrf_token"]
-        if g_csrf_cookie.blank?
-          raise GoogleOneTapCSFRError
-        end
-        if g_csrf_cookie != g_csrf_token
-          raise GoogleOneTapCSFRError
-        end
-        true
-        rescue GoogleOneTapCSFRError => e
+        if g_csrf_token.blank? || g_csrf_cookie.blank? || g_csrf_cookie != g_csrf_token
           raise GoogleOneTapCSFRError.new("Invlaid CSRF")
-      end
+        end
       end
 
       def info
@@ -103,6 +85,7 @@ module OmniAuth
       def uid
         @access_token[:uid]
       end
+
       def provider
         @access_token[:provider]
       end

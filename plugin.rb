@@ -4,7 +4,7 @@
 # about: Discourse Google One Tap/Sing in Plugin
 # version: 0.0.1
 # authors: Ghassan Maslamani
-# url: https://github.com/ghassanmas/discourse-google-one-tap
+# url: https://github.com/discourse/discourse-google-one-tap
 # required_version: 2.7.0
 
 enabled_site_setting :google_one_tap_enabled
@@ -15,19 +15,13 @@ require_relative "lib/google_one_tap"
 require_relative "lib/google_one_tap_authenticator"
 register_asset "stylesheets/google_one_tap.scss"
 
-extend_content_security_policy(
-script_src: ['https://accounts.google.com'],
-)
+extend_content_security_policy(script_src: ['https://accounts.google.com'])
 
 after_initialize do
-
-  register_html_builder('server:before-head-close') do
-    "<script src='https://accounts.google.com/gsi/client' async defer></script>"
-  end
-
-  Discourse::Application.routes.prepend do
-    get "/auth/google_one_tap" => "exceptions#not_found"
-    get "/auth/google_one_tap/callback" => "exceptions#not_found"
+  register_html_builder('server:before-head-close') do |ctx|
+    if !ctx.current_user
+      "<script src='https://accounts.google.com/gsi/client' async defer></script>"
+    end
   end
 
   register_html_builder('server:before-body-close') do |ctx|
@@ -39,18 +33,20 @@ after_initialize do
     #> Do not obscure the perception that the One Tap prompt content is from a Google iframe.
     #> Failure to do so may result in project suspension, account suspension, or both.
     # Ref https://developers.google.com/identity/gsi/web/guides/change-position
-    login_uri = Discourse.base_url + "/auth/google_one_tap/callback"
     result = ""
-    unless (ctx.current_user || !(ctx.request.cookies["authentication_data"].blank?)) #If user is authenticated or (about to create account). don't show the Popup
-      result += "<div id='g_id_onload' "
-        result += "data-prompt_parent_id='g_id_onload' "
-        result += "data-client_id=" + SiteSetting.google_oauth2_client_id + " "
-        result += "data-login_uri=" + login_uri + " "
-        result += "data-itp_support='true' "
-        result += "style='position: absolute; top: 100px; right: 30px; width: 400px; height: 200px; z-index: 1001;'> " # Todo load style values from plugin settings*.
-        result += "</div>"
+    if !ctx.current_user && ctx.request.cookies["authentication_data"].blank?
+      result = <<~HTML
+        <div id="g_id_onload"
+          data-prompt_parent_id="g_id_onload"
+          data-client_id="#{SiteSetting.google_oauth2_client_id}"
+          data-login_uri="#{Discourse.base_url}/auth/google_one_tap/callback"
+          data-itp_support="true"
+          style="position: absolute; top: 100px; right: 30px; width: 400px; height: 200px; z-index: 1001;">
+        </div>
+      HTML
     end
     result
   end
 end
+
 auth_provider authenticator: GoogleOneTapAuthenticator.new

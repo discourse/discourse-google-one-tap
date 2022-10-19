@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 class GoogleOneTapAuthenticator < Auth::ManagedAuthenticator
-
   def name
     "google_one_tap"
   end
-  # To know if its enabled we would need to check the follwoing
-  # 1. Google oauth2 is enabeld (since we will inhrint cleint id and secππret form it)
+
+  # To know if it's enabled we would need to check the following
+  # 1. Google oauth2 is enabeld (since we will inherit client id and secret form it)
   # 2. The plugin is enabled
   def enabled?
     SiteSetting.google_one_tap_enabled
@@ -21,7 +21,6 @@ class GoogleOneTapAuthenticator < Auth::ManagedAuthenticator
   end
 
   def register_middleware(omniauth)
-    omniauth.provider OmniAuth::Strategies::GoogleOneTap, setup: lambda { |env|
-                                                                   strategy = env["omniauth.strategy"]}
+    omniauth.provider(OmniAuth::Strategies::GoogleOneTap)
   end
 end
