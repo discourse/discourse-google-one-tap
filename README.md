@@ -4,7 +4,7 @@ This plugin adds support for Google One Tap sign-in and sign-up to Discourse. Wh
 
 <img width="450" src="https://user-images.githubusercontent.com/17474474/196159737-f290f117-3cf6-46dc-9df9-804e61ccede3.png">
 
-For more information and instructions for installing/configuring the plugin, please see: *(TODO: add meta topic link)*
+For more information and instructions for installing/configuring the plugin, please see: https://meta.discourse.org/t/google-one-tap-login-signup/242510.
 
 ## Implementation
 
