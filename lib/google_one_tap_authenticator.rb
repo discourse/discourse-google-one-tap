@@ -23,4 +23,8 @@ class GoogleOneTapAuthenticator < Auth::ManagedAuthenticator
   def register_middleware(omniauth)
     omniauth.provider(OmniAuth::Strategies::GoogleOneTap)
   end
+
+  def primary_email_verified?(auth_token)
+    true
+  end
 end
