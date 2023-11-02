@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # name: discourse-google-one-tap
-# about: Adds support for Google One Tap sign-up and sign-in. 
+# about: Adds support for Google One Tap sign-up and sign-in.
 # meta_topic_id: 242510
 # version: 0.0.1
 # authors: Ghassan Maslamani
