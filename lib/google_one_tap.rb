@@ -3,11 +3,13 @@
 module OmniAuth
   module Strategies
     class GoogleOneTap
-      class GoogleOneTapValidationError < StandardError; end
-      class GoogleOneTapCSFRError < StandardError; end
+      class GoogleOneTapValidationError < StandardError
+      end
+      class GoogleOneTapCSFRError < StandardError
+      end
       include OmniAuth::Strategy
 
-      option :name , "google_one_tap"
+      option :name, "google_one_tap"
 
       attr_accessor :access_token
 
@@ -42,11 +44,11 @@ module OmniAuth
             first_name: payload["given_name"],
             last_name: payload["family_name"],
             image: payload["picture"],
-            nickname: payload["name"].gsub(" ", "_")
+            nickname: payload["name"].gsub(" ", "_"),
           },
           extra: {
-            raw_info: credential #This the Google id-token (don't confuse this credential with the optional hash value of OmniAuth)
-          }
+            raw_info: credential, #This the Google id-token (don't confuse this credential with the optional hash value of OmniAuth)
+          },
         }
       end
 
