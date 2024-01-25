@@ -7,6 +7,12 @@ acceptance("Google One Tap when disabled", function (needs) {
     google_one_tap_enabled: false,
   });
 
+  needs.pretender((server, helper) => {
+    server.get("/session/passkey/challenge.json", () => {
+      return helper.response({ challenge: "123" });
+    });
+  });
+
   test("it doesn't show on login modal", async function (assert) {
     await visit("");
     await click(".login-button");
@@ -22,6 +28,12 @@ acceptance("Google One Tap when disabled", function (needs) {
 acceptance("Google One Tap when enabled", function (needs) {
   needs.settings({
     google_one_tap_enabled: true,
+  });
+
+  needs.pretender((server, helper) => {
+    server.get("/session/passkey/challenge.json", () => {
+      return helper.response({ challenge: "123" });
+    });
   });
 
   test("it should show up on login modal", async function (assert) {
