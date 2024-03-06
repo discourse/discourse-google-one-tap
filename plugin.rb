@@ -21,7 +21,7 @@ extend_content_security_policy(script_src: ["https://accounts.google.com"])
 after_initialize do
   register_html_builder("server:before-head-close") do |ctx|
     if !ctx.current_user
-      "<script src='https://accounts.google.com/gsi/client' async defer></script>"
+      "<script src='https://accounts.google.com/gsi/client' async defer nonce='#{ctx.helpers.csp_nonce_placeholder}'></script>"
     end
   end
 
