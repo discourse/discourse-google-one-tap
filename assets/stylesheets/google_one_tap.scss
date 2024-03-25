@@ -5,6 +5,19 @@
 }
 #google_one_tap {
   margin: 0.35em 0;
-  display: inline-block;
+  display: inline-flex;
   width: 100%;
+  background-color: transparent;
+
+  > div {
+    display: contents;
+  }
+
+  iframe {
+    max-width: unset;
+  }
+}
+
+.mobile-view #google_one_tap {
+  justify-content: center;
 }
