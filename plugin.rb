@@ -37,11 +37,9 @@ after_initialize do
     result = ""
     result = <<~HTML if !ctx.current_user && ctx.request.cookies["authentication_data"].blank?
         <div id="g_id_onload"
-          data-prompt_parent_id="g_id_onload"
           data-client_id="#{SiteSetting.google_oauth2_client_id}"
           data-login_uri="#{Discourse.base_url}/auth/google_one_tap/callback"
-          data-itp_support="true"
-          style="position: absolute; top: 100px; right: 30px; width: 400px; height: 200px; z-index: 1001;">
+          data-itp_support="true">
         </div>
       HTML
     result
