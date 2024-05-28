@@ -3,7 +3,7 @@
 require "rails_helper"
 
 describe "Google One Tap" do
-  fab!(:user) { Fabricate(:user) }
+  fab!(:user)
 
   let(:rsa_key) { OpenSSL::PKey::RSA.new(2048) }
   let(:cert) do
