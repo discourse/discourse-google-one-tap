@@ -5,7 +5,7 @@ require "rails_helper"
 describe "Google One Tap div and script tags" do
   before { SiteSetting.has_login_hint = false }
 
-  fab!(:user) { Fabricate(:user) }
+  fab!(:user)
 
   context "when the plugin is enabled" do
     before { SiteSetting.google_one_tap_enabled = true }
