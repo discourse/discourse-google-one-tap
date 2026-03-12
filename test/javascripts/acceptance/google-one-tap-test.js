@@ -1,6 +1,6 @@
 import { click, visit } from "@ember/test-helpers";
 import { test } from "qunit";
-import { acceptance, exists } from "discourse/tests/helpers/qunit-helpers";
+import { acceptance } from "discourse/tests/helpers/qunit-helpers";
 
 acceptance("Google One Tap when disabled", function (needs) {
   needs.settings({
@@ -13,15 +13,16 @@ acceptance("Google One Tap when disabled", function (needs) {
     });
   });
 
-  test("it doesn't show on login modal", async function (assert) {
+  test("doesn't show on login modal", async function (assert) {
     await visit("");
     await click(".login-button");
-    assert.notOk(exists("#google_one_tap"));
+    assert.dom("#google_one_tap").doesNotExist();
   });
-  test("it doesn't show on sign up modal", async function (assert) {
+
+  test("doesn't show on sign up modal", async function (assert) {
     await visit("");
     await click(".sign-up-button");
-    assert.notOk(exists("#google_one_tap"));
+    assert.dom("#google_one_tap").doesNotExist();
   });
 });
 
@@ -36,15 +37,15 @@ acceptance("Google One Tap when enabled", function (needs) {
     });
   });
 
-  test("it should show up on login modal", async function (assert) {
+  test("shows up on login modal", async function (assert) {
     await visit("");
     await click(".login-button");
-    assert.ok(exists("#google_one_tap"));
+    assert.dom("#google_one_tap").exists();
   });
 
-  test("it should show up on sign up", async function (assert) {
+  test("shows up on sign up", async function (assert) {
     await visit("");
     await click(".sign-up-button");
-    assert.ok(exists("#google_one_tap"));
+    assert.dom("#google_one_tap").exists();
   });
 });
