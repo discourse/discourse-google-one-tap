@@ -24,6 +24,10 @@ module OmniAuth
         # Ref: https://developers.google.com/identity/gsi/web/guides/verify-google-id-token
         validate_csrf!
         self.access_token = build_access_token # It builds and validate it!.
+        # The `origin` query param is set server-side when rendering the
+        # g_id_onload div so that users are redirected back to the page they
+        # were on when authentication started.
+        env["omniauth.origin"] = request.params["origin"] if request.params["origin"].present?
         super
       rescue GoogleOneTapCSFRError => e
         fail!(:invalid_csrf_token, e)

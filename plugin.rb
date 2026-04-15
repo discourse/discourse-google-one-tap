@@ -35,13 +35,29 @@ after_initialize do
     #> Failure to do so may result in project suspension, account suspension, or both.
     # Ref https://developers.google.com/identity/gsi/web/guides/change-position
     result = ""
-    result = <<~HTML if !ctx.current_user && ctx.request.cookies["authentication_data"].blank?
+    if !ctx.current_user && ctx.request.cookies["authentication_data"].blank?
+      # Pass the current page path to the callback so the user can be redirected
+      # back to it after authentication. We can't rely on cookies here because
+      # Google POSTs to the callback from a cross-site context (SameSite=Lax
+      # cookies aren't sent on cross-site POST navigations).
+      #
+      # Only topic, category, and tag pages are eligible for redirect — other
+      # routes fall through to the homepage.
+      login_uri = +"#{Discourse.base_url}/auth/google_one_tap/callback"
+      origin = ctx.request.fullpath
+      eligible_prefixes = %w[/t/ /c/ /tag/ /tags/].map { "#{Discourse.base_path}#{_1}" }
+      if origin.present? && eligible_prefixes.any? { origin.start_with?(_1) }
+        login_uri << "?origin=#{CGI.escape(origin)}"
+      end
+
+      result = <<~HTML
         <div id="g_id_onload"
           data-client_id="#{SiteSetting.google_oauth2_client_id}"
-          data-login_uri="#{Discourse.base_url}/auth/google_one_tap/callback"
+          data-login_uri="#{login_uri}"
           data-itp_support="true">
         </div>
       HTML
+    end
     result
   end
 end

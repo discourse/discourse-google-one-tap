@@ -199,4 +199,45 @@ describe "Google One Tap" do
     expect(response.location).to eq("http://test.localhost/")
     expect(cookies[:_t]).to be_present
   end
+
+  it "redirects to the origin param when provided and valid" do
+    post "/auth/google_one_tap/callback?origin=%2Ft%2Fsome-topic%2F123",
+         params: {
+           g_csrf_token: "abcdefg",
+           credential: build_jwt_token(email: user.email),
+         },
+         headers: {
+           "HTTP_COOKIE" => "g_csrf_token=abcdefg",
+         }
+    expect(response.status).to eq(302)
+    expect(response.location).to eq("http://test.localhost/t/some-topic/123")
+    expect(cookies[:_t]).to be_present
+  end
+
+  it "sets destination_url in authentication_data to the origin param for signups" do
+    post "/auth/google_one_tap/callback?origin=%2Ft%2Fsome-topic%2F123",
+         params: {
+           g_csrf_token: "abcdefg",
+           credential: build_jwt_token,
+         },
+         headers: {
+           "HTTP_COOKIE" => "g_csrf_token=abcdefg",
+         }
+    expect(response.status).to eq(302)
+    expect(response.location).to eq("http://test.localhost/t/some-topic/123")
+    expect(JSON.parse(cookies[:authentication_data])["destination_url"]).to eq("/t/some-topic/123")
+  end
+
+  it "ignores the origin param when it points to an auth path" do
+    post "/auth/google_one_tap/callback?origin=%2Fauth%2Fgoogle_one_tap",
+         params: {
+           g_csrf_token: "abcdefg",
+           credential: build_jwt_token(email: user.email),
+         },
+         headers: {
+           "HTTP_COOKIE" => "g_csrf_token=abcdefg",
+         }
+    expect(response.status).to eq(302)
+    expect(response.location).to eq("http://test.localhost/")
+  end
 end
