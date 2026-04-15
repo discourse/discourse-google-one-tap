@@ -25,6 +25,10 @@ after_initialize do
     end
   end
 
+  # Path prefixes that are eligible to be passed back as the post-login
+  # redirect target. Other routes fall through to the homepage.
+  prefixes = %w[/t/ /c/ /tag/ /tags/].freeze
+
   register_html_builder("server:before-body-close") do |ctx|
     #This return the div Google JS (loaded above will use)
     #This could also be done in pure JS
@@ -40,12 +44,11 @@ after_initialize do
       # back to it after authentication. We can't rely on cookies here because
       # Google POSTs to the callback from a cross-site context (SameSite=Lax
       # cookies aren't sent on cross-site POST navigations).
-      #
-      # Only topic, category, and tag pages are eligible for redirect — other
-      # routes fall through to the homepage.
       login_uri = +"#{Discourse.base_url}/auth/google_one_tap/callback"
       origin = ctx.request.fullpath
-      eligible_prefixes = %w[/t/ /c/ /tag/ /tags/].map { "#{Discourse.base_path}#{_1}" }
+
+      eligible_prefixes = prefixes.map { "#{Discourse.base_path}#{_1}" }
+
       if origin.present? && eligible_prefixes.any? { origin.start_with?(_1) }
         login_uri << "?origin=#{CGI.escape(origin)}"
       end
