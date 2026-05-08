@@ -182,6 +182,7 @@ describe "Google One Tap" do
       email: "somebodyoncetoldme@gmail.com",
       email_valid: true,
       name: "Osama Shrek",
+      name_from_provider: true,
       username: "Osama_Shrek",
     )
   end
