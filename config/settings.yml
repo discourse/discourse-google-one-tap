@@ -1,4 +1,5 @@
 plugins:
   google_one_tap_enabled:
-    default: true
+    default: false
+    validator: AuthProviderCredentialsValidator
     client: true

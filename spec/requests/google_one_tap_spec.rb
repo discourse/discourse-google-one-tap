@@ -23,8 +23,8 @@ describe "Google One Tap" do
   end
 
   before do
-    SiteSetting.google_one_tap_enabled = true
     SiteSetting.google_oauth2_client_id = "goooogleclientid"
+    SiteSetting.google_one_tap_enabled = true
     stub_request(:get, "https://www.googleapis.com/oauth2/v1/certs").to_return(
       status: 200,
       body: JSON.generate(cert001: cert.to_pem),
