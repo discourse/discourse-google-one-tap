@@ -5,11 +5,12 @@ class GoogleOneTapAuthenticator < Auth::ManagedAuthenticator
     "google_one_tap"
   end
 
-  # To know if it's enabled we would need to check the following
-  # 1. Google oauth2 is enabeld (since we will inherit client id and secret form it)
-  # 2. The plugin is enabled
-  def enabled?
-    SiteSetting.google_one_tap_enabled
+  def enable_setting
+    :google_one_tap_enabled
+  end
+
+  def required_settings
+    %i[google_oauth2_client_id]
   end
 
   def can_revoke?

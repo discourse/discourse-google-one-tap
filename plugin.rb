@@ -20,6 +20,8 @@ extend_content_security_policy(script_src: ["https://accounts.google.com"])
 
 after_initialize do
   register_html_builder("server:before-head-close") do |ctx|
+    next unless GoogleOneTapAuthenticator.new.enabled?
+
     if !ctx.current_user
       "<script src='https://accounts.google.com/gsi/client' async defer nonce='#{ctx.helpers.csp_nonce_placeholder}'></script>"
     end
@@ -30,6 +32,8 @@ after_initialize do
   prefixes = %w[/t/ /c/ /tag/ /tags/].freeze
 
   register_html_builder("server:before-body-close") do |ctx|
+    next unless GoogleOneTapAuthenticator.new.enabled?
+
     #This return the div Google JS (loaded above will use)
     #This could also be done in pure JS
     #Ref: https://developers.google.com/identity/gsi/web/reference/js-reference

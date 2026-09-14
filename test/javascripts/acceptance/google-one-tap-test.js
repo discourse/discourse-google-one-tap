@@ -26,9 +26,31 @@ acceptance("Google One Tap when disabled", function (needs) {
   });
 });
 
+acceptance("Google One Tap when enabled without a client ID", function (needs) {
+  needs.settings({
+    google_one_tap_enabled: true,
+  });
+
+  needs.pretender((server, helper) => {
+    server.get("/session/passkey/challenge.json", () => {
+      return helper.response({ challenge: "123" });
+    });
+  });
+
+  test("doesn't show on login modal", async function (assert) {
+    await visit("");
+    await click(".login-button");
+    assert.dom("#google_one_tap").doesNotExist();
+  });
+});
+
 acceptance("Google One Tap when enabled", function (needs) {
   needs.settings({
     google_one_tap_enabled: true,
+  });
+
+  needs.site({
+    auth_providers: [{ name: "google_one_tap" }],
   });
 
   needs.pretender((server, helper) => {

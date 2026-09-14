@@ -23,8 +23,8 @@ describe "Google One Tap" do
   end
 
   before do
-    SiteSetting.google_one_tap_enabled = true
     SiteSetting.google_oauth2_client_id = "goooogleclientid"
+    SiteSetting.google_one_tap_enabled = true
     stub_request(:get, "https://www.googleapis.com/oauth2/v1/certs").to_return(
       status: 200,
       body: JSON.generate(cert001: cert.to_pem),
@@ -185,6 +185,22 @@ describe "Google One Tap" do
       name_from_provider: true,
       username: "Osama_Shrek",
     )
+  end
+
+  it "refuses the callback when the client ID is cleared" do
+    SiteSetting.google_oauth2_client_id = ""
+
+    post "/auth/google_one_tap/callback",
+         params: {
+           g_csrf_token: "abcdefg",
+           credential: build_jwt_token,
+         },
+         headers: {
+           "HTTP_COOKIE" => "g_csrf_token=abcdefg",
+         }
+
+    expect(response).to have_http_status(:not_found)
+    expect(cookies[:authentication_data]).to be_blank
   end
 
   it "logs in the user if the email in the JWT is already linked to a user" do
