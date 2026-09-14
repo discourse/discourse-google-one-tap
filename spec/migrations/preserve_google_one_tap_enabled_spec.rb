@@ -3,8 +3,6 @@
 require_relative "../../db/migrate/20260911083306_preserve_google_one_tap_enabled"
 
 RSpec.describe PreserveGoogleOneTapEnabled do
-  BOOLEAN_TYPE = 5
-
   subject(:migration) { described_class.new }
 
   before do
@@ -22,7 +20,7 @@ RSpec.describe PreserveGoogleOneTapEnabled do
 
   it "preserves an explicit disabled value" do
     DB.exec(
-      "INSERT INTO site_settings (name, data_type, value, created_at, updated_at) VALUES ('google_one_tap_enabled', #{BOOLEAN_TYPE}, 'f', NOW(), NOW())",
+      "INSERT INTO site_settings (name, data_type, value, created_at, updated_at) VALUES ('google_one_tap_enabled', #{described_class::BOOLEAN_TYPE}, 'f', NOW(), NOW())",
     )
 
     migration.up

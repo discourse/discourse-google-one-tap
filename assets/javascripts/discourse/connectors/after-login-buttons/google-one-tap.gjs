@@ -7,7 +7,9 @@ import { classNames, tagName } from "@ember-decorators/component";
 @classNames("after-login-buttons-outlet", "google-one-tap")
 export default class GoogleOneTap extends Component {
   static shouldRender(_, context) {
-    return context.siteSettings.google_one_tap_enabled;
+    return context.site.auth_providers?.some(
+      (provider) => provider.name === "google_one_tap"
+    );
   }
 
   @action

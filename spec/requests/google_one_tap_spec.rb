@@ -187,6 +187,22 @@ describe "Google One Tap" do
     )
   end
 
+  it "refuses the callback when the client ID is cleared" do
+    SiteSetting.google_oauth2_client_id = ""
+
+    post "/auth/google_one_tap/callback",
+         params: {
+           g_csrf_token: "abcdefg",
+           credential: build_jwt_token,
+         },
+         headers: {
+           "HTTP_COOKIE" => "g_csrf_token=abcdefg",
+         }
+
+    expect(response).to have_http_status(:not_found)
+    expect(cookies[:authentication_data]).to be_blank
+  end
+
   it "logs in the user if the email in the JWT is already linked to a user" do
     post "/auth/google_one_tap/callback",
          params: {
